@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/saullbrandao/ytmusiclist/dependencies"
@@ -31,7 +32,7 @@ func main() {
 	}
 
 	for {
-		userInput, err := getUserInput()
+		userInput, err := getUserInput(ytdlpPath)
 		if err != nil {
 			fmt.Println(err)
 			utils.GracefulExit()
@@ -48,16 +49,8 @@ func main() {
 
 }
 
-func getUserInput() (UserInput, error) {
+func getUserInput(ytdlpPath string) (UserInput, error) {
 	reader := bufio.NewReader(os.Stdin)
-
-	fmt.Print("\nEnter the directory name you want to use(Leave empty for current directory): ")
-	dirName, _ := reader.ReadString('\n')
-	dirName = strings.TrimSpace(dirName)
-
-	if dirName == "" {
-		dirName = "."
-	}
 
 	fmt.Print("Enter YouTube playlist URL: ")
 	url, _ := reader.ReadString('\n')
@@ -65,6 +58,23 @@ func getUserInput() (UserInput, error) {
 
 	if url == "" {
 		return UserInput{}, errors.New("Error: URL required")
+	}
+
+	playlistTitle, err := getPlaylistTitle(ytdlpPath, url)
+	if err != nil {
+		playlistTitle = "playlist"
+	}
+
+	fmt.Printf("Enter the directory name you want to use (Leave empty to use \"%s\"): ", playlistTitle)
+	dirName, _ := reader.ReadString('\n')
+	dirName = strings.TrimSpace(dirName)
+
+	if dirName == "" {
+		dirName = playlistTitle
+	}
+
+	if dirName == "" {
+		dirName = "."
 	}
 
 	fmt.Print("Do you want to convert to MP3? (Y/n): ")
@@ -77,4 +87,25 @@ func getUserInput() (UserInput, error) {
 	}
 
 	return UserInput{playlistUrl: url, dirName: dirName, convertToMp3: convertToMp3}, nil
+}
+
+func getPlaylistTitle(ytdlpPath, url string) (string, error) {
+	cmd := exec.Command(ytdlpPath, "--print", "%(playlist_title)s", "--flat-playlist", "-i", url)
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+	title := lines[0]
+	title = sanitizeFileName(title)
+	return title, nil
+}
+
+func sanitizeFileName(name string) string {
+	invalidChars := []string{"/", "\\", ":", "*", "?", "\"", "<", ">", "|"}
+	result := name
+	for _, char := range invalidChars {
+		result = strings.ReplaceAll(result, char, "_")
+	}
+	return strings.TrimSpace(result)
 }
