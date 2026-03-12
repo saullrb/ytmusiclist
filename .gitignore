@@ -1,0 +1,19 @@
+# Binaries
+ytmusiclist
+ytmusiclist.exe
+
+# Go workspace file
+go.work
+
+# Go vendor directory
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
