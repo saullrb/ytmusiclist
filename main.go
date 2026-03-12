@@ -77,13 +77,13 @@ func getUserInput(ytdlpPath string) (UserInput, error) {
 		dirName = "."
 	}
 
-	fmt.Print("Do you want to convert to MP3? (Y/n): ")
+	fmt.Print("Do you want to convert to MP3? (y/N): ")
 	mp3Input, _ := reader.ReadString('\n')
 	mp3Input = strings.ToLower(strings.TrimSpace(mp3Input))
 
-	convertToMp3 := true
-	if mp3Input == "n" {
-		convertToMp3 = false
+	convertToMp3 := false
+	if mp3Input == "y" {
+		convertToMp3 = true
 	}
 
 	return UserInput{playlistUrl: url, dirName: dirName, convertToMp3: convertToMp3}, nil
