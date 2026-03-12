@@ -11,11 +11,16 @@ func downloadPlaylist(ytdlpPath string, userInput UserInput) error {
 		return err
 	}
 
+	audioFormat := "mp3"
+	if !userInput.convertToMp3 {
+		audioFormat = "best"
+	}
+
 	cmd := exec.Command(
 		ytdlpPath,
 		"-x",
 		"--audio-format",
-		"mp3",
+		audioFormat,
 		"--quiet",
 		"--progress",
 		"--no-simulate",

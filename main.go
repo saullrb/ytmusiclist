@@ -12,8 +12,9 @@ import (
 )
 
 type UserInput struct {
-	playlistUrl string
-	dirName     string
+	playlistUrl  string
+	dirName      string
+	convertToMp3 bool
 }
 
 func main() {
@@ -66,5 +67,14 @@ func getUserInput() (UserInput, error) {
 		return UserInput{}, errors.New("Error: URL required")
 	}
 
-	return UserInput{playlistUrl: url, dirName: dirName}, nil
+	fmt.Print("Do you want to convert to MP3? (Y/n): ")
+	mp3Input, _ := reader.ReadString('\n')
+	mp3Input = strings.ToLower(strings.TrimSpace(mp3Input))
+
+	convertToMp3 := true
+	if mp3Input == "n" {
+		convertToMp3 = false
+	}
+
+	return UserInput{playlistUrl: url, dirName: dirName, convertToMp3: convertToMp3}, nil
 }
